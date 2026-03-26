@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>🌍 Plataforma Internacional de Adopciones by Lousita 🌈</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body {font-family:'Roboto',sans-serif; margin:0; background:#f0f4f8; scroll-behavior:smooth;}
+header {background:linear-gradient(90deg, #0b5ed7, #0dcaf0); color:white; padding:30px; text-align:center; font-size:28px; font-weight:700; letter-spacing:1px; text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
+nav {position:sticky; top:0; background:white; padding:10px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+nav a {margin:10px; text-decoration:none; color:#0b5ed7; font-weight:500;}
+nav a:hover, nav a.active {text-decoration:underline;}
+.section {max-width:900px; margin:40px auto; background:white; padding:30px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.1);}
+.section h2 {margin-top:0; color:#0b5ed7;}
+input, select, button, textarea {width:100%; padding:12px; margin-bottom:10px; border-radius:6px; border:1px solid #ccc; font-size:16px;}
+button {background:#0b5ed7; color:white; border:none; cursor:pointer; transition:0.3s;}
+button:hover {background:#084298;}
+.search-box {position:relative;}
+#lista {position:absolute; width:100%; background:white; border:1px solid #ccc; max-height:200px; overflow-y:auto; display:none; z-index:10;}
+.item {padding:10px; cursor:pointer;}
+.item:hover {background:#eee;}
+#certificado {display:none; padding:25px; border:3px solid #0b5ed7; border-radius:10px; text-align:center; margin-top:20px; font-family:"Times New Roman"; background:#e7f1ff;}
+.faq {margin:10px 0;}
+.faq h3 {color:#0b5ed7; cursor:pointer;}
+.faq p {display:none; padding:5px 15px; background:#f1f5f9; border-radius:5px;}
+#gameCanvas {display:none; margin:auto; border:2px solid #0b5ed7; border-radius:10px; background:#f9f9f9;}
+</style>
+</head>
+<body>
+
+<header>🌍 Plataforma Internacional de Adopciones <span style="font-size:16px;">by Lousita</span> 🌈</header>
+
+<nav>
+  <a href="#bienvenida">Bienvenida</a>
+  <a href="#adopcion">Formulario</a>
+  <a href="#faq">FAQs</a>
+  <a href="#juego">Juego</a>
+</nav>
+
+<!-- Bienvenida -->
+<div class="section" id="bienvenida">
+  <h2>Bienvenido a la Plataforma Internacional de Adopciones</h2>
+  <p style="line-height:1.6; font-size:16px;">
+    Esta plataforma ofrece una experiencia simbólica de integración cultural global. 
+    Aquí puedes registrar la adopción simbólica de personas de todo el mundo, generar un certificado oficial descargable y explorar nuestros recursos educativos.
+    Cada sección ha sido diseñada para brindar claridad, diversión y profesionalismo.
+  </p>
+  <button onclick="document.getElementById('adopcion').scrollIntoView({behavior:'smooth'});">Comenzar proceso de adopción</button>
+</div>
+
+<!-- Formulario Adopción -->
+<div class="section" id="adopcion">
+  <h2>Formulario de Adopción</h2>
+  <input id="nombre" placeholder="Nombre completo del solicitante">
+  <input id="persona" placeholder="Nombre de la persona a adoptar">
+  <div class="search-box">
+    <input id="buscador" placeholder="Buscar país..." onkeyup="filtrar()">
+    <div id="lista"></div>
+  </div>
+  <img id="bandera" width="120" style="display:block; margin:10px 0;">
+  <button onclick="procesar()">Registrar adopción</button>
+
+  <div id="certificado">
+    <h2>Certificado Oficial de Adopción</h2>
+    <p id="texto"></p>
+    <img id="banderaCert" width="120">
+    <p id="fecha"></p>
+    <p id="id"></p>
+    <p style="margin-top:10px; font-style:italic;">by Lousita</p>
+    <button onclick="descargarPDF()">Descargar PDF</button>
+  </div>
+</div>
+
+<!-- FAQs -->
+<div class="section" id="faq">
+  <h2>Preguntas Frecuentes (FAQs)</h2>
+  <div class="faq">
+    <h3>¿Qué significa esta adopción?</h3>
+    <p>Es un proceso simbólico para aprender sobre otras culturas y registrar tu interés de manera divertida y profesional.</p>
+  </div>
+  <div class="faq">
+    <h3>¿Puedo elegir cualquier país?</h3>
+    <p>Sí, puedes elegir cualquier país de la lista y se mostrará su bandera automáticamente.</p>
+  </div>
+  <div class="faq">
+    <h3>¿Puedo descargar el certificado?</h3>
+    <p>Sí, al completar el formulario recibirás un certificado profesional descargable en PDF.</p>
+  </div>
+</div>
+
+<!-- Juego -->
+<div class="section" id="juego">
+  <h2>Juego de Rebote</h2>
+  <p>Mueve la barra con teclado, mouse o tactil. Pulsa "Iniciar Juego" para empezar. Si pierdes, presiona "Iniciar Juego" nuevamente.</p>
+  <button id="startGameBtn">Iniciar Juego</button>
+  <canvas id="gameCanvas" width="400" height="500"></canvas>
+  <p>Score: <span id="score">0</span> | Récord: <span id="highScore">0</span></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// Países
+const paises=["Afganistán","Albania","Alemania","Argentina","Brasil","Chile","Colombia","Cuba","México","Nigeria","Perú","España","Estados Unidos","Rusia","Turquía","Venezuela"];
+let seleccionado=null;
+function filtrar(){
+  let texto=document.getElementById("buscador").value.toLowerCase();
+  let lista=document.getElementById("lista");
+  lista.innerHTML="";
+  lista.style.display="block";
+  paises.filter(p=>p.toLowerCase().startsWith(texto)).forEach(p=>{
+    let div=document.createElement("div");
+    div.className="item";
+    div.innerText=p;
+    div.onclick=()=>{
+      document.getElementById("buscador").value=p;
+      seleccionado=p;
+      lista.style.display="none";
+      document.getElementById("bandera").src="https://flagcdn.com/w320/"+codigoPais(p)+".png";
+    };
+    lista.appendChild(div);
+  });
+}
+function codigoPais(p){
+  const cod={"Afganistán":"af","Albania":"al","Alemania":"de","Argentina":"ar","Brasil":"br","Chile":"cl","Colombia":"co","Cuba":"cu","México":"mx","Nigeria":"ng","Perú":"pe","España":"es","Estados Unidos":"us","Rusia":"ru","Turquía":"tr","Venezuela":"ve"};
+  return cod[p]||"us";
+}
+function procesar(){
+  let nombre=document.getElementById("nombre").value;
+  let persona=document.getElementById("persona").value;
+  if(!nombre||!persona||!seleccionado){ alert("Complete todos los campos"); return; }
+  let fecha=new Date().toLocaleDateString();
+  let id=Math.floor(Math.random()*99999);
+  document.getElementById("texto").innerText=`${nombre} ha adoptado simbólicamente a ${persona} (${seleccionado})`;
+  document.getElementById("banderaCert").src="https://flagcdn.com/w320/"+codigoPais(seleccionado)+".png";
+  document.getElementById("fecha").innerText="Fecha: "+fecha;
+  document.getElementById("id").innerText="ID: "+id;
+  document.getElementById("certificado").style.display="block";
+  document.getElementById("nombre").value="";
+  document.getElementById("persona").value="";
+  document.getElementById("buscador").value="";
+  seleccionado=null;
+}
+function descargarPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont("Times","Normal");
+  doc.setFontSize(18);
+  doc.text("CERTIFICADO OFICIAL DE ADOPCIÓN",20,30);
+  doc.setFontSize(12);
+  doc.text(document.getElementById("texto").innerText,20,50);
+  doc.text(document.getElementById("fecha").innerText,20,60);
+  doc.text(document.getElementById("id").innerText,20,70);
+  doc.text("by Lousita",20,80);
+  doc.save("certificado.pdf");
+}
+
+// FAQs toggle
+document.querySelectorAll(".faq h3").forEach(h=>{
+  h.addEventListener("click", ()=>{ const p=h.nextElementSibling; p.style.display=(p.style.display==="block"?"none":"block"); });
+});
+
+// Juego
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
+let ballRadius, x, y, dx, dy, paddleHeight, paddleWidth, paddleX;
+let rightPressed=false, leftPressed=false;
+let score=0, highScore=localStorage.getItem("highScore")||0;
+document.getElementById("highScore").innerText=highScore;
+let gameRunning=false;
+document.addEventListener("keydown", e=>{ if(e.key=="Right"||e.key=="ArrowRight") rightPressed=true; if(e.key=="Left"||e.key=="ArrowLeft") leftPressed=true; });
+document.addEventListener("keyup", e=>{ if(e.key=="Right"||e.key=="ArrowRight") rightPressed=false; if(e.key=="Left"||e.key=="ArrowLeft") leftPressed=false; });
+let touchStartX=null;
+canvas.addEventListener("touchstart", e=>{ touchStartX=e.touches[0].clientX; });
+canvas.addEventListener("touchmove", e=>{ if(touchStartX!==null){ let diff=e.touches[0].clientX-touchStartX; paddleX+=diff; if(paddleX<0)paddleX=0; if(paddleX>canvas.width-paddleWidth)paddleX=canvas.width-paddleWidth; touchStartX=e.touches[0].clientX; }});
+function drawBall(){ ctx.beginPath(); ctx.arc(x,y,ballRadius,0,Math.PI*2); ctx.fillStyle="#0b5ed7"; ctx.fill(); ctx.closePath();}
+function drawPaddle(){ ctx.beginPath(); ctx.rect(paddleX,canvas.height-paddleHeight-5,paddleWidth,paddleHeight); ctx.fillStyle="#0b5ed7"; ctx.fill(); ctx.closePath();}
+function updateScore(){ document.getElementById("score").innerText=score; document.getElementById("highScore").innerText=highScore; }
+function draw(){
+  if(!gameRunning) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBall();
+  drawPaddle();
+  x+=dx; y+=dy;
+  if(x+dx>canvas.width-ballRadius||x+dx<ballRadius) dx=-dx;
+  if(y+dy<ballRadius) dy=-dy;
+  if(y+dy>canvas.height-ballRadius-paddleHeight-5){
+    if(x>paddleX&&x<paddleX+paddleWidth){ dy=-dy*1.05; dx*=1.02; score++; if(score>highScore){ highScore=score; localStorage.setItem("highScore",highScore); } }
+    else{ alert("Juego terminado! Pulsa Iniciar Juego para jugar de nuevo"); gameRunning=false; score=0; x=canvas.width/2; y=canvas.height-30; return; }
+  }
+  if(rightPressed&&paddleX<canvas.width-paddleWidth)paddleX+=7;
+  if(leftPressed&&paddleX>0)paddleX-=7;
+  updateScore();
+  requestAnimationFrame(draw);
+}
+function iniciarJuego(){ ballRadius=12; x=canvas.width/2; y=canvas.height-30; dx=2; dy=-2; paddleHeight=12; paddleWidth=80; paddleX=(canvas.width-paddleWidth)/2; score=0; gameRunning=true; canvas.style.display="block"; draw();}
+document.getElementById("startGameBtn").addEventListener("click", ()=>{ if(!gameRunning) iniciarJuego(); });
+</script>
+</body>
+</html>
